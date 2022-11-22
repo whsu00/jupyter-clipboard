@@ -37,8 +37,8 @@ define([
         function handle_msg(msg) {
             // Jupyter will try to copy the current cell instead of a hidden text area
             // unless we disable its keyboard_manager hijacking
-            Jupyter.notebook.keyboard_manager.disable()
-            copyToClipboard(msg)
+            Jupyter.notebook.keyboard_manager.disable();
+            copyToClipboard(msg.content.data);
             Jupyter.notebook.keyboard_manager.enable();
             Jupyter.notebook.keyboard_manager.command_mode();
             if (cell = Jupyter.notebook.get_selected_cell()) {
@@ -46,14 +46,14 @@ define([
             }
         }
 
-        console.debug('registering clipboard')
+        console.debug('registering clipboard');
         Jupyter.notebook.kernel.comm_manager.register_target(
             'jupyter-pyperclip',
             (comm, msg) => comm.on_msg(handle_msg)
         );
-        console.debug('registering clipboard...done')
+        console.debug('registering clipboard...done');
 
-        console.debug('installing pyperclip hook')
+        console.debug('installing pyperclip hook');
         callbacks = {
             shell: {
                 reply: (e) => console.log('Installing pyperclip.copy: ' + e.content.status)
@@ -61,7 +61,7 @@ define([
             iopub: {
                 output: (e) => console.log(e)
             }
-        }
+        };
         Jupyter.notebook.kernel.execute(`
 from ipykernel.comm import Comm
 
@@ -86,20 +86,20 @@ except ImportError:
     }
 
     function setup(was_delayed) {
-        console.log('running jupyter-pyperclip setup, delayed=' + was_delayed)
+        console.log('running jupyter-pyperclip setup, delayed=' + was_delayed);
 
         // install the hook server-side *after* we've registered the client-side
         // hook, and trigger now if the kernel is already alive!
-        console.debug('installing hook')
+        console.debug('installing hook');
         if (Jupyter.notebook.kernel !== undefined && Jupyter.notebook.kernel !== null) {
             pyperclip();
         }
-        events.on('kernel_ready.Kernel', pyperclip)
+        events.on('kernel_ready.Kernel', pyperclip);
     }
 
     function load_ipython_extension() {
         if (Jupyter.notebook._fully_loaded) {
-            console.debug('notebook _fully_loaded, starting setup')
+            console.debug('notebook _fully_loaded, starting setup');
             setup(false);
         } else {
             events.on('notebook_loaded.Notebook', function() {
